@@ -35,7 +35,7 @@ public class MyAnimation extends JPanel {
             this.panel = panel;
             x = (int) (Math.random() * maxX);  
             y = (int) (Math.random() * maxY);  
-            type = (int) (Math.random() * 3);  
+//            type = (int) (Math.random() * 3);  
         }
         public void run() {
             while (true) {
