@@ -1,0 +1,71 @@
+package animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
+public class MyAnimation extends JPanel {
+    private final Ball[] balls = new Ball[10];  // 5 balls
+
+    // Constructor initializes balls and starts threads
+    public MyAnimation(int width, int height) {
+        for (int i = 0; i < balls.length; i++) {
+            balls[i] = new Ball(width, height, this);  // Initialize each ball
+            new Thread(balls[i]).start();  // Start each ball's movement in a separate thread
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.RED);  // Red color for the balls
+        for (Ball ball : balls) {
+            g.fillOval(ball.x, ball.y, 30, 30);  // Draw each ball as a red circle
+        }
+    }
+
+    // Ball class that implements Runnable for multithreading
+    private static class Ball implements Runnable {
+        int x, y, speedX = 5, speedY = 5, maxX, maxY;
+        final MyAnimation panel;
+
+        // Ball constructor
+        Ball(int width, int height, MyAnimation panel) {
+            this.panel = panel;
+            maxX = width - 30;  // Set maxX to width minus the ball's width
+            maxY = height - 30;  // Set maxY to height minus the ball's height
+            x = (int) (Math.random() * maxX);  // Random initial X position
+            y = (int) (Math.random() * maxY);  // Random initial Y position
+        }
+
+        // The run method for the ball's movement
+        public void run() {
+            while (true) {
+                // Update ball position
+                x += speedX; 
+                y += speedY;
+
+                // Bounce off edges
+                if (x > maxX || x < 0) speedX = -speedX;  // Horizontal boundary check
+                if (y > maxY || y < 0) speedY = -speedY;  // Vertical boundary check
+
+                // Check for collision with other balls
+                for (Ball other : panel.balls) {
+                    if (other != this && getBounds().intersects(other.getBounds())) {
+                        // Reverse direction if collision is detected
+                        speedX = -speedX;
+                        speedY = -speedY;
+                    }
+                }
+
+                panel.repaint();  // Request panel repaint after moving
+                try { Thread.sleep(20); } catch (InterruptedException ignored) {}  // Small delay
+            }
+        }
+
+        // Get the bounding box of the ball for collision detection
+        public java.awt.Rectangle getBounds() {
+            return new java.awt.Rectangle(x, y, 30, 30);  // Returns a rectangle representing the ball
+        }
+    }
+}

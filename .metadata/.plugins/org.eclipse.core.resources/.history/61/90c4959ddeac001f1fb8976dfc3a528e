@@ -1,0 +1,13 @@
+package package12;
+
+import package12.Circle;
+
+public class MainProgram {
+    public static void main(String[] args) {
+        // Create a Circle object with radius 5.0
+        Circle circle = new Circle(5.0);
+        
+        // Calculate and print the area of the circle
+        System.out.println("Area of the circle: " + circle.area());
+    }
+}

@@ -1,0 +1,70 @@
+package animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class MyAnimation extends JPanel {
+    private final List<Ball> balls = new ArrayList<>();
+    private final int maxWidth, maxHeight;
+    MyAnimation(int width, int height) {
+        this.maxWidth = width;
+        this.maxHeight = height;
+        for (int i = 0; i < 5; i++) { 
+            Ball ball = new Ball(maxWidth, maxHeight, this);
+            balls.add(ball);
+            new Thread(ball).start();
+        }
+    }
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        // Draw all balls
+        for (Ball ball : balls) {
+            g.setColor(ball.color);
+            g.fillOval(ball.x, ball.y, ball.size, ball.size);
+        }
+    }
+    private static class Ball implements Runnable {
+        int x, y, size = 30;
+        int speedX, speedY;
+        final int maxX, maxY;
+        final Color color;
+        final MyAnimation panel;
+
+        Ball(int maxX, int maxY, MyAnimation panel) {
+            this.maxX = maxX;
+            this.maxY = maxY;
+            this.panel = panel;
+
+            Random random = new Random();
+            this.x = random.nextInt(maxX);
+            this.y = random.nextInt(maxY);
+            this.speedX = 5 + random.nextInt(5); 
+            this.speedY = 5 + random.nextInt(5);
+            this.color = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256)); 
+        }
+        public void run() {
+            while (true) {
+          
+                x += speedX;
+                y += speedY;
+                
+                if (x > maxX || x < 0) speedX = -speedX;
+                if (y > maxY || y < 0) speedY = -speedY;
+
+                panel.repaint(); 
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+}
+
+
+

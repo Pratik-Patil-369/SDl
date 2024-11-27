@@ -1,0 +1,58 @@
+package animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
+public class MyAnimation extends JPanel {
+    private final Shape[] shapes = new Shape[5];
+
+    MyAnimation(int width, int height) {
+        for (int i = 0; i < shapes.length; i++) 
+            new Thread(shapes[i] = new Shape(width, height, this)).start();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (Shape shape : shapes) {
+            g.setColor(Color.RED);
+            if (shape.type == 0) {  // Circle
+                g.fillOval(shape.x, shape.y, 30, 30);
+            } else if (shape.type == 1) {  // Rectangle
+                g.fillRect(shape.x, shape.y, 30, 30);
+            } else if (shape.type == 2) {  // Triangle
+                int[] xPoints = {shape.x, shape.x + 30, shape.x - 30};
+                int[] yPoints = {shape.y, shape.y + 30, shape.y + 30};
+                g.fillPolygon(xPoints, yPoints, 3);
+            }
+        }
+    }
+
+    private static class Shape implements Runnable {
+        int x, y, speedX = 5, speedY = 5, maxX, maxY, type;
+        final JPanel panel;
+
+        Shape(int width, int height, JPanel panel) {
+            maxX = width - 30; 
+            maxY = height - 30;
+            this.panel = panel;
+            x = (int) (Math.random() * maxX); 
+            y = (int) (Math.random() * maxY);
+            type = (int) (Math.random() * 3);  // Randomly assign a shape type
+        }
+
+        public void run() {
+            while (true) {
+                x += speedX;
+                y += speedY;
+                if (x > maxX || x < 0) speedX = -speedX;
+                if (y > maxY || y < 0) speedY = -speedY;
+
+                panel.repaint();  // Repaint the panel
+
+                try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+            }
+        }
+    }
+}

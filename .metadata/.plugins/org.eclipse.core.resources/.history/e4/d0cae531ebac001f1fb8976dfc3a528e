@@ -1,0 +1,71 @@
+package animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
+public class MyAnimation extends JPanel {
+    private final Ball[] balls = new Ball[5];
+
+    MyAnimation(int width, int height) {
+        for (int i = 0; i < balls.length; i++) 
+            new Thread(balls[i] = new Ball(width, height, this, balls)).start();
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.RED);
+        for (Ball ball : balls) g.fillOval(ball.x, ball.y, 30, 30);
+    }
+
+    private static class Ball implements Runnable {
+        int x, y, speedX = 5, speedY = 5, maxX, maxY;
+        final JPanel panel;
+        final Ball[] balls; // Reference to the other balls
+
+        Ball(int width, int height, JPanel panel, Ball[] balls) {
+            maxX = width - 30; 
+            maxY = height - 30; 
+            this.panel = panel;
+            this.balls = balls; // Store reference to other balls
+            x = (int) (Math.random() * maxX); 
+            y = (int) (Math.random() * maxY);
+        }
+
+        public void run() {
+            while (true) {
+                move();
+                checkCollisions();
+                panel.repaint();
+                try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+            }
+        }
+
+        private void move() {
+            x += speedX; 
+            y += speedY;
+            if (x > maxX || x < 0) speedX = -speedX;
+            if (y > maxY || y < 0) speedY = -speedY;
+        }
+
+        private void checkCollisions() {
+            for (Ball other : balls) {
+                if (other != this && isColliding(other)) {
+                    // Reverse speeds on collision
+                    speedX = -speedX;
+                    speedY = -speedY;
+                    other.speedX = -other.speedX;
+                    other.speedY = -other.speedY;
+                }
+            }
+        }
+
+        private boolean isColliding(Ball other) {
+            int dx = x - other.x;
+            int dy = y - other.y;
+            double distanceSquared = dx * dx + dy * dy;
+            return distanceSquared < (30 * 30); // Radius squared for collision detection
+        }
+    }
+}

@@ -1,0 +1,45 @@
+package animation;
+
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Graphics;
+
+public class MyAnimation extends JPanel implements Runnable {
+    int x = 0, y = 0;
+    int ballWidth = 50, ballHeight = 50;
+    int maxX, maxY;
+    int speedX = 10, speedY = 10;
+
+    MyAnimation(int w, int h) {
+        this.maxX = w - ballWidth;
+        this.maxY = h - ballHeight;
+        new Thread(this).start(); // Start the thread for animation
+    }
+
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.RED);
+        g.fillOval(x, y, ballWidth, ballHeight);
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            x += speedX;
+            y += speedY;
+
+            // Reverse direction if it hits the edges
+            if (x > maxX || x < 0) speedX = -speedX;
+            if (y > maxY || y < 0) speedY = -speedY;
+
+            repaint(); // Repaint the panel with updated position
+            try {
+                Thread.sleep(50); // Pause to control animation speed
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+

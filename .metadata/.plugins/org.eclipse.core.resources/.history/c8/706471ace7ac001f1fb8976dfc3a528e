@@ -1,0 +1,92 @@
+package animation;
+
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class MyAnimation extends JPanel {
+    private final List<Shape> shapes = new ArrayList<>();
+    private final int maxWidth, maxHeight;
+    
+    public MyAnimation(int width, int height) {
+        this.maxWidth = width;
+        this.maxHeight = height;
+        
+        // Create and start threads for different shapes
+        for (int i = 0; i < 3; i++) { 
+            Shape shape = new Shape(maxWidth, maxHeight, this);
+            shapes.add(shape);
+            new Thread(shape).start();
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        // Draw each shape
+        for (Shape shape : shapes) {
+            g.setColor(shape.color);
+            shape.draw(g);
+        }
+    }
+    
+    // Shape class that handles the movement and drawing
+    private static class Shape implements Runnable {
+        int x, y, speedX = 5, speedY = 5, size = 30, maxX, maxY;
+        final JPanel panel;
+        final Color color;
+        final String type;
+
+        Shape(int maxX, int maxY, JPanel panel) {
+            this.maxX = maxX - size;
+            this.maxY = maxY - size;
+            this.panel = panel;
+            
+            // Random position
+            this.x = (int) (Math.random() * maxX);
+            this.y = (int) (Math.random() * maxY);
+            
+            // Random color and shape type
+            Random random = new Random();
+            this.color = new Color(random.nextInt(256), random.nextInt(256), random.nextInt(256));
+            this.type = random.nextBoolean() ? "circle" : random.nextBoolean() ? "square" : "triangle";
+        }
+
+        public void run() {
+            while (true) {
+                x += speedX;
+                y += speedY;
+                if (x > maxX || x < 0) speedX = -speedX;
+                if (y > maxY || y < 0) speedY = -speedY;
+                
+                // Repaint the panel to update the position
+                panel.repaint();
+                
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ignored) {}
+            }
+        }
+
+        // Draw the shape based on the type
+        public void draw(Graphics g) {
+            switch (type) {
+                case "circle":
+                    g.fillOval(x, y, size, size);
+                    break;
+                case "square":
+                    g.fillRect(x, y, size, size);
+                    break;
+                case "triangle":
+                    int[] xPoints = {x, x + size / 2, x - size / 2};
+                    int[] yPoints = {y, y + size, y + size};
+                    g.fillPolygon(xPoints, yPoints, 3);
+                    break;
+            }
+        }
+    }
+}
+

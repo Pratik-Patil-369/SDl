@@ -1,0 +1,24 @@
+package animation;
+
+import java.awt.Color;
+import javax.swing.JFrame;
+
+public class Animation extends JFrame {
+
+    Animation() {
+        setSize(800, 600);
+        setTitle("Multithreaded Bouncing Balls");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        BallPanel panel = new BallPanel(780, 560);
+        panel.setBackground(Color.BLACK);
+        add(panel);
+    }
+
+    public static void main(String[] args) {
+        new Animation().setVisible(true);
+    }
+}
+
+

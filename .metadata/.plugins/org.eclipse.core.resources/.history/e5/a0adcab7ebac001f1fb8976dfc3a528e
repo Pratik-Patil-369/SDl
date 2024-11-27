@@ -1,0 +1,56 @@
+package animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
+public class MyAnimation extends JPanel {
+    private final Shape[] shapes = new Shape[5];  // Array to hold different shapes
+
+    public MyAnimation(int width, int height) {
+        for (int i = 0; i < shapes.length; i++) {
+            shapes[i] = new Shape(width, height, this);  // Create shape
+            new Thread(shapes[i]).start();  // Start shape movement thread
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (Shape shape : shapes) {
+            g.setColor(Color.RED);  // Use red color for all shapes
+            if (shape.type == 0) g.fillOval(shape.x, shape.y, 30, 30);  // Circle
+            else if (shape.type == 1) g.fillRect(shape.x, shape.y, 30, 30);  // Square
+            else {
+                int[] xPoints = {shape.x, shape.x + 30, shape.x - 30};  // Triangle points
+                int[] yPoints = {shape.y, shape.y + 30, shape.y + 30};
+                g.fillPolygon(xPoints, yPoints, 3);  // Triangle
+            }
+        }
+    }
+
+    private static class Shape implements Runnable {
+        int x, y, speedX = 5, speedY = 5, maxX, maxY, type;
+        final MyAnimation panel;
+
+        Shape(int width, int height, MyAnimation panel) {
+            this.panel = panel;
+            maxX = width - 30;
+            maxY = height - 30;
+            x = (int) (Math.random() * maxX);
+            y = (int) (Math.random() * maxY);
+            type = (int) (Math.random() * 3);  // Randomly select shape type (0: Circle, 1: Square, 2: Triangle)
+        }
+
+        public void run() {
+            while (true) {
+                x += speedX;
+                y += speedY;
+                if (x > maxX || x < 0) speedX = -speedX;  // Bounce off walls
+                if (y > maxY || y < 0) speedY = -speedY;
+                panel.repaint();  // Repaint the panel
+                try { Thread.sleep(50); } catch (InterruptedException ignored) {}
+            }
+        }
+    }
+}

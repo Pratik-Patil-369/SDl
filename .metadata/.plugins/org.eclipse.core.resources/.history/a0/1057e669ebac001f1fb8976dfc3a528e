@@ -1,0 +1,73 @@
+package animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
+public class MyAnimation extends JPanel {
+    private final Shape[] shapes = new Shape[5];  // Array to hold different shapes
+
+    // Constructor: Initialize shapes and start threads
+    public MyAnimation(int width, int height) {
+        for (int i = 0; i < shapes.length; i++) {
+            shapes[i] = new Shape(width, height, this);  // Create each shape
+            new Thread(shapes[i]).start();  // Start each shape's movement in its own thread
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        for (Shape shape : shapes) {
+            g.setColor(shape.color);  // Set the color of the shape
+            // Draw different shapes based on the shape type
+            switch (shape.type) {
+                case 0: // Circle
+                    g.fillOval(shape.x, shape.y, 30, 30);
+                    break;
+                case 1: // Square
+                    g.fillRect(shape.x, shape.y, 30, 30);
+                    break;
+                case 2: // Triangle
+                    int[] xPoints = {shape.x, shape.x + 30, shape.x - 30};
+                    int[] yPoints = {shape.y, shape.y + 30, shape.y + 30};
+                    g.fillPolygon(xPoints, yPoints, 3);
+                    break;
+            }
+        }
+    }
+
+    // Shape class that implements Runnable for multithreading
+    private static class Shape implements Runnable {
+        int x, y, speedX = 5, speedY = 5, maxX, maxY, type;
+        Color color;
+        final MyAnimation panel;
+
+        // Shape constructor: Initializes position, movement, and shape type
+        Shape(int width, int height, MyAnimation panel) {
+            this.panel = panel;
+            maxX = width - 30;  // Set maxX to panel width minus the shape's width
+            maxY = height - 30;  // Set maxY to panel height minus the shape's height
+            x = (int) (Math.random() * maxX);  // Random initial x position
+            y = (int) (Math.random() * maxY);  // Random initial y position
+            type = (int) (Math.random() * 3);  // Randomly select the shape type (0: Circle, 1: Square, 2: Triangle)
+            color = new Color((int) (Math.random() * 0x1000000));  // Random color
+        }
+
+        // The run method to move the shape and check for boundary collisions
+        public void run() {
+            while (true) {
+                // Move the shape
+                x += speedX;
+                y += speedY;
+
+                // Bounce off the walls
+                if (x > maxX || x < 0) speedX = -speedX;
+                if (y > maxY || y < 0) speedY = -speedY;
+
+                panel.repaint();  // Request repaint of the panel
+                try { Thread.sleep(50); } catch (InterruptedException ignored) {}  // Sleep to control the speed of the animation
+            }
+        }
+    }
+}

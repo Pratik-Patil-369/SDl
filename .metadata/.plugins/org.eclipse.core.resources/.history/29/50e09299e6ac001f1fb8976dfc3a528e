@@ -1,0 +1,50 @@
+package animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.JPanel;
+
+public class MyAnimation extends JPanel {
+    private final Ball[] balls;
+
+    MyAnimation(int width, int height) {
+        balls = new Ball[5];
+        for (int i = 0; i < balls.length; i++) {
+            balls[i] = new Ball(width, height, this);
+            new Thread(balls[i]).start();
+        }
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        g.setColor(Color.RED);
+        for (Ball ball : balls) g.fillOval(ball.x, ball.y, ball.size, ball.size);
+    }
+
+    private static class Ball implements Runnable {
+        int x, y, size = 30, speedX = 5, speedY = 5;
+        final int maxX, maxY;
+        final JPanel panel;
+
+        Ball(int maxX, int maxY, JPanel panel) {
+            this.maxX = maxX - size;
+            this.maxY = maxY - size;
+            this.panel = panel;
+            x = (int) (Math.random() * maxX);
+            y = (int) (Math.random() * maxY);
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                x += speedX;
+                y += speedY;
+                if (x > maxX || x < 0) speedX = -speedX;
+                if (y > maxY || y < 0) speedY = -speedY;
+                panel.repaint();
+                try { Thread.sleep(50); } catch (InterruptedException e) { break; }
+            }
+        }
+    }
+}
